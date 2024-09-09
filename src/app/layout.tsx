@@ -25,7 +25,7 @@ export default async function RootLayout({
                 <br></br>
                 <Link href="/productInfo">Product info</Link>
                 <br></br>
-                <Link href="/logout">Logout</Link>
+                <Link href="/logout" prefetch={false}>Logout</Link>
               </nav>
               {children}
             </>
