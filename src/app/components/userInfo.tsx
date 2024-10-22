@@ -1,5 +1,6 @@
 import { cookies } from "next/headers"
 import { formatMoney, API_URL } from "../utils"
+import { redirect } from "next/navigation"
 
 interface UserResponse {
     user: {
@@ -15,6 +16,8 @@ export default async function UserInfo() {
     const response = await fetch(`${API_URL}/api/v1/user`, {
         headers: { "Authorization": "Bearer " + cookies().get("accessToken")?.value }
     })
+    if(response.status === 401)
+        redirect("/login")
     const body: UserResponse = await response.json();
     return <>
         <h3>User info:</h3>

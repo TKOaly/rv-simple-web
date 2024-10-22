@@ -1,5 +1,6 @@
 import { cookies } from "next/headers"
 import { formatMoney, API_URL } from "../utils"
+import { redirect } from "next/navigation";
 
 interface Product {
     barcode: string, name: string, category: { description: string }, sellPrice: number, stock: number
@@ -42,6 +43,8 @@ export default async function ProductList() {
     const response = await fetch(`${API_URL}/api/v1/products`, {
         headers: { "Authorization": "Bearer " + cookies().get("accessToken")?.value }
     })
+    if(response.status === 401)
+        redirect("/login")
     const body: ProductsResponse = await response.json();
     let productsInStock = body.products
         .filter(product => product.stock != 0);
