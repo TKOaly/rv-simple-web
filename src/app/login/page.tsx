@@ -1,9 +1,9 @@
-import { cookies } from "next/headers"
 import Login from "../components/login"
 import { redirect } from "next/navigation"
+import { isTokenValid } from "../utils"
 
 export default async function Page() {
-    if (cookies().has("accessToken")) {
+    if (isTokenValid()) {
         redirect("/userInfo")
     }
     return <>
