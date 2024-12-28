@@ -30,6 +30,16 @@ body {
   margin: 0;
 }
 
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+  padding: 0.15em;
+}
+
+table {
+  margin: 1em;
+}
+
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;

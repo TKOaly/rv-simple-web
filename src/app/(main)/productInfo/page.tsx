@@ -1,4 +1,4 @@
-import ProductList from "../components/productList"
+import ProductList from "../../components/productList"
 
 export default async function Page() {
     return <>
