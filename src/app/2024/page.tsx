@@ -9,6 +9,9 @@ const errHandler = (err: any) => {
     return undefined
 };
 
+const TIME_LOWER_BOUND = new Date("01-01-2024");
+const TIME_UPPER_BOUND = new Date("01-01-2025");
+
 export default async function Page() {
     `use server`
 
@@ -21,42 +24,42 @@ export default async function Page() {
     const userid = await response.json().then(x => x.user.userId)
 
 
-    const total_purchases = await items_bought_total(userid).catch(errHandler);
-    const most_bought_by_count = await items_bought_most_frequently(10, userid)
+    const total_purchases = await items_bought_total(userid, TIME_LOWER_BOUND, TIME_UPPER_BOUND).catch(errHandler);
+    const most_bought_by_count = await items_bought_most_frequently(10, userid, TIME_LOWER_BOUND, TIME_UPPER_BOUND)
         .then(res => res.map(x => <tr>
             <td>{x.name}</td>
             <td>{x.count}</td>
         </tr>)).catch(errHandler);
-    const most_bought_by_sum = await items_bought_most_money(10, userid)
+    const most_bought_by_sum = await items_bought_most_money(10, userid, TIME_LOWER_BOUND, TIME_UPPER_BOUND)
         .then(res => res.map(x => <tr>
             <td>{x.name}</td>
             <td>{formatMoney(x.sum)}€</td>
         </tr>)).catch(errHandler);
-    const first_purchase = await year_first_purchase(userid).catch(errHandler);
-    const last_purchase = await year_last_purchase(userid).catch(errHandler);
-    const most_purchases_day = await day_most_purchases(userid).catch(errHandler)
+    const first_purchase = await year_first_purchase(userid, TIME_LOWER_BOUND, TIME_UPPER_BOUND).catch(errHandler);
+    const last_purchase = await year_last_purchase(userid, TIME_LOWER_BOUND, TIME_UPPER_BOUND).catch(errHandler);
+    const most_purchases_day = await day_most_purchases(userid, TIME_LOWER_BOUND, TIME_UPPER_BOUND).catch(errHandler)
 
-    const all_total = await all_total_purchases().catch(errHandler)
+    const all_total = await all_total_purchases(TIME_LOWER_BOUND, TIME_UPPER_BOUND).catch(errHandler)
 
-    const distrib_hour = await purchase_distribution_hour(userid)
+    const distrib_hour = await purchase_distribution_hour(userid, TIME_LOWER_BOUND, TIME_UPPER_BOUND)
         .then(x =>
         (<>{BarPlot(0, 24, new Map(x.map(x => ([x.hour, x.sum]
         ))))}</>
         ))
         .catch(errHandler)
-    const distrib_month = await purchase_distribution_month(userid)
+    const distrib_month = await purchase_distribution_month(userid, TIME_LOWER_BOUND, TIME_UPPER_BOUND)
         .then(x =>
         (<>{BarPlot(1, 12, new Map(x.map(x => ([x.month, x.sum]
         ))))}</>
         ))
         .catch(errHandler)
-    const distrib_dow = await purchase_distribution_dow(userid)
+    const distrib_dow = await purchase_distribution_dow(userid, TIME_LOWER_BOUND, TIME_UPPER_BOUND)
         .then(x =>
         (<>{BarPlot(0, 6, new Map(x.map(x => ([x.dow, x.sum]
         ))))}</>
         ))
         .catch(errHandler)
-    const spent_by_others = await purchases_by_persons()
+    const spent_by_others = await purchases_by_persons(TIME_LOWER_BOUND, TIME_UPPER_BOUND)
         .catch(errHandler)
     return <>
         <h2>RV 2024 stats</h2>
