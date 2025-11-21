@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
-import { all_total_purchases, day_most_purchases, items_bought_most_frequently, items_bought_most_money, items_bought_total, purchase_distribution_dow, purchase_distribution_hour, purchase_distribution_month, purchases_by_persons, year_first_purchase, year_last_purchase } from "../api/2024"
-import BarPlot from "../components/barPlot";
-import { API_URL, formatMoney } from "../utils";
+import { all_total_purchases, day_most_purchases, items_bought_most_frequently, items_bought_most_money, items_bought_total, purchase_distribution_dow, purchase_distribution_hour, purchase_distribution_month, purchases_by_persons, year_first_purchase, year_last_purchase } from "../../api/year"
+import BarPlot from "../../components/barPlot";
+import { API_URL, formatMoney } from "../../utils";
 import { redirect } from "next/navigation";
 
 const errHandler = (err: any) => {
@@ -9,11 +9,28 @@ const errHandler = (err: any) => {
     return undefined
 };
 
-const TIME_LOWER_BOUND = new Date("01-01-2024");
-const TIME_UPPER_BOUND = new Date("01-01-2025");
-
-export default async function Page() {
+export default async function Page({ params }: {
+    params: { year: string }
+}) {
     `use server`
+    const year = Number.parseInt(params.year);
+
+    if (Number.isNaN(year) || !Number.isInteger(year)) {
+        return <>
+            <p>Sorry, year {params.year} is not a valid year.</p>
+        </>
+    }
+
+    const TIME_LOWER_BOUND = new Date("01-01-" + year);
+    const TIME_UPPER_BOUND = new Date("01-01-" + (year + 1));
+
+    const now = new Date();
+
+    if (TIME_UPPER_BOUND > now) {
+        return <>
+            <p>Sorry, year {year} has not finished yet.</p>
+        </>
+    }
 
     const response = await fetch(`${API_URL}/api/v1/user`, {
         headers: { "Authorization": "Bearer " + cookies().get("accessToken")?.value }
@@ -25,6 +42,14 @@ export default async function Page() {
 
 
     const total_purchases = await items_bought_total(userid, TIME_LOWER_BOUND, TIME_UPPER_BOUND).catch(errHandler);
+
+    if (total_purchases?.count === 0) {
+        return <>
+            <h2>RV {year} stats</h2>
+            <p>You did not make any purchases during {year}.</p>
+        </>
+    }
+
     const most_bought_by_count = await items_bought_most_frequently(10, userid, TIME_LOWER_BOUND, TIME_UPPER_BOUND)
         .then(res => res.map(x => <tr>
             <td>{x.name}</td>
@@ -61,12 +86,13 @@ export default async function Page() {
         .catch(errHandler)
     const spent_by_others = await purchases_by_persons(TIME_LOWER_BOUND, TIME_UPPER_BOUND)
         .catch(errHandler)
+
     return <>
-        <h2>RV 2024 stats</h2>
+        <h2>RV {year} stats</h2>
         {total_purchases && all_total && spent_by_others ?
             <>
                 <p>During the year you bought {total_purchases.count} items worth {formatMoney(total_purchases.sum)}€ (average purchase {formatMoney(Math.round(total_purchases.sum / total_purchases.count))}€).</p>
-                <p>They represent {Math.ceil(total_purchases.count / all_total.count * 10000) / 100}% of total purchases from RV and {Math.ceil(total_purchases.sum / all_total.sum * 10000) / 100}% of the 2024 revenue.</p>
+                <p>They represent {Math.ceil(total_purchases.count / all_total.count * 10000) / 100}% of total purchases from RV and {Math.ceil(total_purchases.sum / all_total.sum * 10000) / 100}% of the {year} revenue.</p>
                 <br></br>
                 <p>You spent more than {
                     Math.round(spent_by_others.filter(x => x.sum < total_purchases.sum).length / spent_by_others.length * 100)

@@ -10,14 +10,14 @@ export async function items_bought_total(userId: string, timeLowerBound: Date, t
   }>(`
     SELECT SUM("PRICE".sellprice) as sum, COUNT(*) as count
     FROM "RVPERSON"
-    LEFT JOIN "ITEMHISTORY" on "ITEMHISTORY".userid  = "RVPERSON".userid
+    JOIN "ITEMHISTORY" on "ITEMHISTORY".userid  = "RVPERSON".userid
     JOIN "ACTION" on "ITEMHISTORY".actionid = "ACTION".actionid
     JOIN "RVITEM" on "ITEMHISTORY".itemid = "RVITEM".itemid
-    LEFT JOIN "PRICE" on "ITEMHISTORY".priceid1 = "PRICE".priceid
-    WHERE "RVPERSON".userid=$1
+    JOIN "PRICE" on "ITEMHISTORY".priceid1 = "PRICE".priceid
+    WHERE "RVPERSON".userid =  $1
     AND "ACTION".action = 'BOUGHT BY'
-    AND "ITEMHISTORY".time >= $2
-    AND "ITEMHISTORY".time < $3;
+    AND "ITEMHISTORY".time >= $2::timestamptz
+    AND "ITEMHISTORY".time < $3::timestamptz;
   `, [userId, timeLowerBound, timeUpperBound])).rows;
   return result.map(x => ({ count: Number.parseInt(x.count), sum: Number.parseInt(x.sum) }))[0]
 }
