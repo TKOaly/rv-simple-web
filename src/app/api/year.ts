@@ -245,3 +245,27 @@ export async function purchases_by_persons(timeLowerBound: Date, timeUpperBound:
   `, [timeLowerBound, timeUpperBound])).rows;
   return result.map(x => ({ count: Number.parseInt(x.count), sum: Number.parseInt(x.sum) }))
 }
+
+// List of products for which most purchases during the year were made by the userId
+export async function top_buyer_products(userId: string, timeLowerBound: Date, timeUpperBound: Date) {
+  'use server'
+  const result = (await pool.query<{
+    count: string,
+    descr: string
+  }>(`
+    SELECT descr, count FROM (
+      SELECT DISTINCT ON("RVITEM".itemid) "RVPERSON".userid, "RVITEM".descr, COUNT(*) as count
+      FROM "RVPERSON"
+      JOIN "ITEMHISTORY" on "ITEMHISTORY".userid  = "RVPERSON".userid
+      JOIN "ACTION" on "ITEMHISTORY".actionid = "ACTION".actionid
+      JOIN "RVITEM" on "ITEMHISTORY".itemid = "RVITEM".itemid
+      JOIN "PRICE" on "ITEMHISTORY".priceid1 = "PRICE".priceid
+      WHERE "ACTION".action = 'BOUGHT BY'
+      AND "ITEMHISTORY".time >= $2
+      AND "ITEMHISTORY".time < $3
+      GROUP BY "RVPERSON".userid, "RVITEM".itemid, "RVITEM".descr
+      ORDER BY "RVITEM".itemid, count DESC)
+    WHERE userid=$1 ORDER BY count DESC;
+  `, [userId, timeLowerBound, timeUpperBound])).rows;
+  return result.map(x => ({ descr: x.descr, count: x.count }))
+}

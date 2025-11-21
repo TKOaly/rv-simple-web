@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { all_total_purchases, day_most_purchases, items_bought_most_frequently, items_bought_most_money, items_bought_total, purchase_distribution_dow, purchase_distribution_hour, purchase_distribution_month, purchases_by_persons, year_first_purchase, year_last_purchase } from "../../api/year"
+import { all_total_purchases, day_most_purchases, items_bought_most_frequently, items_bought_most_money, items_bought_total, purchase_distribution_dow, purchase_distribution_hour, purchase_distribution_month, purchases_by_persons, top_buyer_products, year_first_purchase, year_last_purchase } from "../../api/year"
 import BarPlot from "../../components/barPlot";
 import { API_URL, formatMoney } from "../../utils";
 import { redirect } from "next/navigation";
@@ -65,6 +65,13 @@ export default async function Page({ params }: {
     const most_purchases_day = await day_most_purchases(userid, TIME_LOWER_BOUND, TIME_UPPER_BOUND).catch(errHandler)
 
     const all_total = await all_total_purchases(TIME_LOWER_BOUND, TIME_UPPER_BOUND).catch(errHandler)
+
+    const most_purchases = await top_buyer_products(userid, TIME_LOWER_BOUND, TIME_UPPER_BOUND)
+        .then(res => res.map(x => <tr>
+            <td>{x.descr}</td>
+            <td>{x.count}</td>
+        </tr>))
+        .catch(errHandler)
 
     const distrib_hour = await purchase_distribution_hour(userid, TIME_LOWER_BOUND, TIME_UPPER_BOUND)
         .then(x =>
@@ -151,30 +158,56 @@ export default async function Page({ params }: {
                 <br></br>
             </>
             : ""}
-        {most_purchases_day ?
+        {most_purchases && most_purchases.length > 0 ?
             <>
-                <p>Most purchases done on {most_purchases_day.time.toLocaleDateString()} ({most_purchases_day.count} in total with the sum of {formatMoney(most_purchases_day.sum)}€).</p>
+                <table>
+                    <caption>Products for which you were the most frequent buyer</caption>
+                    <thead>
+                        <tr>
+                            <th>name</th>
+                            <th>count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {most_purchases}
+                    </tbody>
+                </table>
                 <br></br>
-            </> : ""}
+            </>
+            : ""}
+        {most_purchases && most_purchases.length == 0 && <><p>You were not the most frequent buyer for any product.</p> <br></br></>}
+        {
+            most_purchases_day ?
+                <>
+                    <p>Most purchases done on {most_purchases_day.time.toLocaleDateString()} ({most_purchases_day.count} in total with the sum of {formatMoney(most_purchases_day.sum)}€).</p>
+                    <br></br>
+                </> : ""
+        }
 
 
-        {distrib_hour ?
-            <>
-                <p>Spent money by hour.</p>
-                {distrib_hour}
-                <br></br>
-            </> : ""}
-        {distrib_month ?
-            <>
-                <p>Spent money by month.</p>
-                {distrib_month}
-                <br></br>
-            </> : ""}
-        {distrib_dow ?
-            <>
-                <p>Spent money by day of the week (0 = monday).</p>
-                {distrib_dow}
-                <br></br>
-            </> : ""}
+        {
+            distrib_hour ?
+                <>
+                    <p>Spent money by hour.</p>
+                    {distrib_hour}
+                    <br></br>
+                </> : ""
+        }
+        {
+            distrib_month ?
+                <>
+                    <p>Spent money by month.</p>
+                    {distrib_month}
+                    <br></br>
+                </> : ""
+        }
+        {
+            distrib_dow ?
+                <>
+                    <p>Spent money by day of the week (0 = monday).</p>
+                    {distrib_dow}
+                    <br></br>
+                </> : ""
+        }
     </>
 }
