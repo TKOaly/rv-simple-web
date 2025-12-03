@@ -26,7 +26,7 @@ export default async function Page({ params }: {
 
     const now = new Date();
 
-    const available_from = TIME_LOWER_BOUND;
+    const available_from = new Date(TIME_LOWER_BOUND);
     available_from.setMonth(11);
     available_from.setDate(1);
     if (available_from > now) {
