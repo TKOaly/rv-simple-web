@@ -4,7 +4,7 @@ import Link from "next/link";
 
 // @ts-ignore
 export default function Layout({ children }) {
-  const lastYear = new Date().getFullYear() - 1;
+  const lastYear = new Date().getFullYear() - (new Date().getMonth() === 11 ? 0 : 1);
   return (
     <>
       {

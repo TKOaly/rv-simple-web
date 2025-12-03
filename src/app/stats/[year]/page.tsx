@@ -26,7 +26,10 @@ export default async function Page({ params }: {
 
     const now = new Date();
 
-    if (TIME_UPPER_BOUND > now) {
+    const available_from = TIME_LOWER_BOUND;
+    available_from.setMonth(11);
+    available_from.setDate(1);
+    if (available_from > now) {
         return <>
             <p>Sorry, year {year} has not finished yet.</p>
         </>
