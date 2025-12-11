@@ -143,7 +143,7 @@ export async function purchase_distribution_hour(userId: string, timeLowerBound:
     count: string,
     sum: string
   }>(`
-    SELECT EXTRACT(HOUR FROM "ITEMHISTORY".time) as hour, SUM("PRICE".sellprice) as sum, COUNT(*) as count
+    SELECT EXTRACT(HOUR FROM "ITEMHISTORY".time AT TIME ZONE 'Europe/Helsinki') as hour, SUM("PRICE".sellprice) as sum, COUNT(*) as count
     FROM "RVPERSON"
     LEFT JOIN "ITEMHISTORY" on "ITEMHISTORY".userid  = "RVPERSON".userid
     JOIN "ACTION" on "ITEMHISTORY".actionid = "ACTION".actionid
@@ -153,7 +153,7 @@ export async function purchase_distribution_hour(userId: string, timeLowerBound:
     AND "ACTION".action = 'BOUGHT BY'
     AND "ITEMHISTORY".time >= $2
     AND "ITEMHISTORY".time < $3
-    GROUP BY EXTRACT(HOUR FROM "ITEMHISTORY".time)
+    GROUP BY EXTRACT(HOUR FROM "ITEMHISTORY".time AT TIME ZONE 'Europe/Helsinki')
     ORDER BY hour ASC;
   `, [userId, timeLowerBound, timeUpperBound])).rows;
   return result.map(x => ({ hour: Number.parseInt(x.hour), count: Number.parseInt(x.count), sum: Number.parseInt(x.sum) }))
@@ -166,7 +166,7 @@ export async function purchase_distribution_month(userId: string, timeLowerBound
     count: string,
     sum: string
   }>(`
-    SELECT EXTRACT(MONTH FROM "ITEMHISTORY".time) as month, SUM("PRICE".sellprice) as sum, COUNT(*) as count
+    SELECT EXTRACT(MONTH FROM "ITEMHISTORY".time AT TIME ZONE 'Europe/Helsinki') as month, SUM("PRICE".sellprice) as sum, COUNT(*) as count
     FROM "RVPERSON"
     LEFT JOIN "ITEMHISTORY" on "ITEMHISTORY".userid  = "RVPERSON".userid
     JOIN "ACTION" on "ITEMHISTORY".actionid = "ACTION".actionid
@@ -176,7 +176,7 @@ export async function purchase_distribution_month(userId: string, timeLowerBound
     AND "ACTION".action = 'BOUGHT BY'
     AND "ITEMHISTORY".time >= $2
     AND "ITEMHISTORY".time < $3
-    GROUP BY EXTRACT(MONTH FROM "ITEMHISTORY".time)
+    GROUP BY EXTRACT(MONTH FROM "ITEMHISTORY".time AT TIME ZONE 'Europe/Helsinki')
     ORDER BY month ASC;
   `, [userId, timeLowerBound, timeUpperBound])).rows;
   return result.map(x => ({ month: Number.parseInt(x.month), count: Number.parseInt(x.count), sum: Number.parseInt(x.sum) }))
@@ -190,7 +190,7 @@ export async function purchase_distribution_dow(userId: string, timeLowerBound: 
     count: string,
     sum: string
   }>(`
-    SELECT EXTRACT(DOW FROM "ITEMHISTORY".time) as dow, SUM("PRICE".sellprice) as sum, COUNT(*) as count
+    SELECT EXTRACT(DOW FROM "ITEMHISTORY".time AT TIME ZONE 'Europe/Helsinki') as dow, SUM("PRICE".sellprice) as sum, COUNT(*) as count
     FROM "RVPERSON"
     LEFT JOIN "ITEMHISTORY" on "ITEMHISTORY".userid  = "RVPERSON".userid
     JOIN "ACTION" on "ITEMHISTORY".actionid = "ACTION".actionid
@@ -200,7 +200,7 @@ export async function purchase_distribution_dow(userId: string, timeLowerBound: 
     AND "ACTION".action = 'BOUGHT BY'
     AND "ITEMHISTORY".time >= $2
     AND "ITEMHISTORY".time < $3
-    GROUP BY EXTRACT(DOW FROM "ITEMHISTORY".time)
+    GROUP BY EXTRACT(DOW FROM "ITEMHISTORY".time AT TIME ZONE 'Europe/Helsinki')
     ORDER BY DOW ASC;
   `, [userId, timeLowerBound, timeUpperBound])).rows;
   return result.map(x => ({ dow: (Number.parseInt(x.dow) - 1 + 7) % 7, count: Number.parseInt(x.count), sum: Number.parseInt(x.sum) }))
