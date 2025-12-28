@@ -12,17 +12,17 @@ export function formatMoney(cents: number): string {
 }
 
 export function formatDate(date: Date): string {
-    return date.getFullYear() + "-" + (date.getMonth()+1).toString().padStart(2, "0") + "-" + date.getDate().toString().padStart(2, "0") + " " + date.getHours().toString().padStart(2, "0") + ":" + date.getMinutes().toString().padStart(2, "0") + ":" + date.getSeconds().toString().padStart(2, "0");
+    return date.getFullYear() + "-" + (date.getMonth() + 1).toString().padStart(2, "0") + "-" + date.getDate().toString().padStart(2, "0") + " " + date.getHours().toString().padStart(2, "0") + ":" + date.getMinutes().toString().padStart(2, "0") + ":" + date.getSeconds().toString().padStart(2, "0");
 }
 
-export function isTokenValid(): boolean {
-    const cookie = cookies().get("accessToken")
-    if(!cookie?.value)
+export async function isTokenValid(): Promise<boolean> {
+    const cookie = await cookies().then(x => x.get("accessToken"))
+    if (!cookie?.value)
         return false
 
     const payload = decode(cookie.value)
 
-    if(!payload || typeof payload === "string" || payload.exp === undefined)
+    if (!payload || typeof payload === "string" || payload.exp === undefined)
         return false
     return payload.exp > Date.now() / 1000
 }

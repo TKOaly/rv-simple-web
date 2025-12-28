@@ -11,7 +11,7 @@ export default function Login({ redirectUrl }: { redirectUrl?: string }) {
         const response = await fetch(`${API_URL}/api/v1/authenticate`, { headers: { "Content-Type": "application/json" }, method: "POST", body: JSON.stringify({ username: username, password: password }) })
         const data = await response.json()
         if (response.status == 200) {
-            cookies().set('accessToken', data.accessToken)
+            await cookies().then(x => x.set('accessToken', data.accessToken))
             redirect(redirectUrl != null && redirectUrl.toString().length > 0 ? redirectUrl.toString() : "/userInfo", RedirectType.replace)
         } else {
         }

@@ -14,9 +14,9 @@ interface UserResponse {
 
 export default async function UserInfo() {
     const response = await fetch(`${API_URL}/api/v1/user`, {
-        headers: { "Authorization": "Bearer " + cookies().get("accessToken")?.value }
+        headers: { "Authorization": "Bearer " + await cookies().then(x => x.get("accessToken")?.value) }
     })
-    if(response.status === 401)
+    if (response.status === 401)
         redirect("/login")
     const body: UserResponse = await response.json();
     return <>

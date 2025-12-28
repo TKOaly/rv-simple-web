@@ -8,7 +8,7 @@ export default async function Page({
     searchParams: { [key: string]: string | string[] | undefined }
 }) {
     const redirectUrl = (typeof searchParams.redir === "string") ? searchParams.redir : "/userInfo";
-    if (isTokenValid()) {
+    if (await isTokenValid()) {
         redirect(redirectUrl)
     }
     return <>

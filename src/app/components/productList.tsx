@@ -13,14 +13,12 @@ function ProductTable(products: Product[]) {
     let rows = products
         .sort((a, b) => a.name.localeCompare(b.name))
         .map(product => {
-            return <>
-                <tr>
-                    <td>{product.name}</td>
-                    <td>{formatMoney(product.sellPrice)}</td>
-                    <td>{product.stock}</td>
-                    <td>{product.barcode}</td>
-                </tr>
-            </>;
+            return <tr key={product.barcode}>
+                <td>{product.name}</td>
+                <td>{formatMoney(product.sellPrice)}</td>
+                <td>{product.stock}</td>
+                <td>{product.barcode}</td>
+            </tr>;
         });
     return <>
         <table>
@@ -41,9 +39,9 @@ function ProductTable(products: Product[]) {
 
 export default async function ProductList() {
     const response = await fetch(`${API_URL}/api/v1/products`, {
-        headers: { "Authorization": "Bearer " + cookies().get("accessToken")?.value }
+        headers: { "Authorization": "Bearer " + await cookies().then(x => x.get("accessToken")?.value) }
     })
-    if(response.status === 401)
+    if (response.status === 401)
         redirect("/login")
     const body: ProductsResponse = await response.json();
     let productsInStock = body.products

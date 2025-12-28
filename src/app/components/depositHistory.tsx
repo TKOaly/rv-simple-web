@@ -8,19 +8,17 @@ interface DepositHistoryResponse {
 
 export default async function DepositHistory() {
     const response = await fetch(`${API_URL}/api/v1/user/depositHistory`, {
-        headers: { "Authorization": "Bearer " + cookies().get("accessToken")?.value }
+        headers: { "Authorization": "Bearer " + await cookies().then(x => x.get("accessToken")?.value) }
     })
-    if(response.status === 401)
+    if (response.status === 401)
         redirect("/login")
     const body: DepositHistoryResponse = await response.json();
     let totalDeposited = body.deposits.reduce((pv, deposit) => pv + deposit.amount, 0)
     let rows = body.deposits.map(deposit => {
-        return <>
-            <tr>
-                <td>{formatDate(new Date(deposit.time))}</td>
-                <td>{formatMoney(deposit.amount)}</td>
-            </tr>
-        </>;
+        return <tr key={deposit.time}>
+            <td>{formatDate(new Date(deposit.time))}</td>
+            <td>{formatMoney(deposit.amount)}</td>
+        </tr>;
     });
     return <>
         <h3>Deposits ({body.deposits.length} in total {formatMoney(totalDeposited)}€): </h3>

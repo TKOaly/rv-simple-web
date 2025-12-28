@@ -8,21 +8,18 @@ interface PurchaseHistoryResponse {
 
 export default async function DepositHistory() {
     const response = await fetch(`${API_URL}/api/v1/user/purchaseHistory`, {
-        headers: { "Authorization": "Bearer " + cookies().get("accessToken")?.value }
+        headers: { "Authorization": "Bearer " + await cookies().then(x => x.get("accessToken")?.value) }
     })
-    if(response.status === 401)
+    if (response.status === 401)
         redirect("/login")
     const body: PurchaseHistoryResponse = await response.json();
     let rows = body.purchases.map(purchase => {
-        return <>
-            <tr>
-                <td>{formatDate(new Date(purchase.time))}</td>
-                <td>{purchase.product.name}</td>
-                <td>{formatMoney(purchase.price)}</td>
-                <td>{purchase.returned ? "returned" : ""}</td>
-
-            </tr>
-        </>;
+        return <tr key={crypto.randomUUID()}>
+            <td>{formatDate(new Date(purchase.time))}</td>
+            <td>{purchase.product.name}</td>
+            <td>{formatMoney(purchase.price)}</td>
+            <td>{purchase.returned ? "returned" : ""}</td>
+        </tr>;
     });
     let totalPurchased = body.purchases.reduce((pv, purchase) => pv + (purchase.returned ? 0 : purchase.price), 0)
     let totalReturned = body.purchases.reduce((pv, purchase) => pv + (purchase.returned ? purchase.price : 0), 0)

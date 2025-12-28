@@ -3,6 +3,7 @@ import { all_total_purchases, day_most_purchases, items_bought_most_frequently, 
 import BarPlot from "../../components/barPlot";
 import { API_URL, formatMoney } from "../../utils";
 import { redirect } from "next/navigation";
+import { randomUUID } from "crypto";
 
 const errHandler = (err: any) => {
     console.error(err);
@@ -10,14 +11,13 @@ const errHandler = (err: any) => {
 };
 
 export default async function Page({ params }: {
-    params: { year: string }
+    params: Promise<{ year: string }>
 }) {
     `use server`
-    const year = Number.parseInt(params.year);
-
+    const year = Number.parseInt((await params).year);
     if (Number.isNaN(year) || !Number.isInteger(year)) {
         return <>
-            <p>Sorry, year {params.year} is not a valid year.</p>
+            <p>Sorry, year {(await params).year} is not a valid year.</p>
         </>
     }
 
@@ -36,7 +36,7 @@ export default async function Page({ params }: {
     }
 
     const response = await fetch(`${API_URL}/api/v1/user`, {
-        headers: { "Authorization": "Bearer " + cookies().get("accessToken")?.value }
+        headers: { "Authorization": "Bearer " + await cookies().then(x => x.get("accessToken")?.value) }
     })
     if (response.status === 401)
         redirect("/login")
@@ -54,12 +54,12 @@ export default async function Page({ params }: {
     }
 
     const most_bought_by_count = await items_bought_most_frequently(10, userid, TIME_LOWER_BOUND, TIME_UPPER_BOUND)
-        .then(res => res.map(x => <tr>
+        .then(res => res.map(x => <tr key={x.name}>
             <td>{x.name}</td>
             <td>{x.count}</td>
         </tr>)).catch(errHandler);
     const most_bought_by_sum = await items_bought_most_money(10, userid, TIME_LOWER_BOUND, TIME_UPPER_BOUND)
-        .then(res => res.map(x => <tr>
+        .then(res => res.map(x => <tr key={x.name}>
             <td>{x.name}</td>
             <td>{formatMoney(x.sum)}€</td>
         </tr>)).catch(errHandler);
@@ -70,7 +70,7 @@ export default async function Page({ params }: {
     const all_total = await all_total_purchases(TIME_LOWER_BOUND, TIME_UPPER_BOUND).catch(errHandler)
 
     const most_purchases = await top_buyer_products(userid, TIME_LOWER_BOUND, TIME_UPPER_BOUND)
-        .then(res => res.map(x => <tr>
+        .then(res => res.map(x => <tr key={x.descr}>
             <td>{x.descr}</td>
             <td>{x.count}</td>
         </tr>))
