@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@fast-csv/format": "^5.0.5",
     "jsonwebtoken": "^9.0.3",
     "next": "^16.1.1",
     "pg": "^8.16.3",

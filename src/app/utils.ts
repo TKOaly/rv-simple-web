@@ -26,3 +26,23 @@ export async function isTokenValid(): Promise<boolean> {
         return false
     return payload.exp > Date.now() / 1000
 }
+
+export interface UserResponse {
+    user: {
+        username: string,
+        fullName: string,
+        email: string,
+        moneyBalance: number,
+        role: string
+    }
+}
+
+export async function userInfo(): Promise<UserResponse | undefined> {
+    const response = await fetch(`${API_URL}/api/v1/user`, {
+        headers: { "Authorization": "Bearer " + await cookies().then(x => x.get("accessToken")?.value) }
+    })
+    if (!response.ok) {
+        return undefined
+    }
+    return await response.json() as UserResponse;
+}
